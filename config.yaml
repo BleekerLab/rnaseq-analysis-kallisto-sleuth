@@ -1,0 +1,16 @@
+---
+
+workdir: scratch/
+resultdir: results/
+
+fqdir: /home/mgalland/data/01_sequencing_runs/20160216_mRNAs_20_accessions/
+
+# kallisto fasta file that will be indexed by Kallisto
+kallisto:
+  fasta_ref: /home/mgalland/data/02_refs/Solanum_lycopersicum/ITAG3.2/ITAG3.2_cDNA.with_terpene_synthases.fasta
+  fragment-length: 90
+  sd: 30
+  bootstrap: 100
+
+sleuth:
+  info: /home/mgalland/01_sequencing_runs/20160216_mRNAs_20_accessions/seqdesign.modified.txt
