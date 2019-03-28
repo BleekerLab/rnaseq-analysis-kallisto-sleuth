@@ -5,7 +5,7 @@ A Snakemake pipeline to go from mRNA-Seq reads to normalised transcript abundanc
 ############################
 ## Minimal Snakemake version
 ############################
-min_version("5.2.0")
+#min_version("5.2.0")
 
 #############################################
 ## Configuration (parameters, samples, units)
@@ -18,7 +18,7 @@ RESULT_DIR = config["resultdir"]
 
 # directory that contains original fastq files
 FQ_DIR = config["fqdir"]
-SAMPLES, = glob_wildcards(FQ_DIR + "{sample}.fastq.gz")
+SAMPLES, = glob_wildcards(FQ_DIR + "{sample}.fq.gz")
 
 # read length parameters
 MIN_LEN = 25
@@ -104,9 +104,9 @@ rule trim_reads:
 
 rule gunzip:
     input:
-        FQ_DIR + "{sample}.fastq.gz"
+        FQ_DIR + "{sample}.fq.gz"
     output:
-        temp("/zfs/scratch/mgalland_temp/{sample}.fastq")
+        temp("trimmed/{sample}.fq")
     message:"Unzipping {input} file"
     shell:
         "zcat {input} > {output}"
