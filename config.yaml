@@ -3,11 +3,24 @@
 workdir: scratch/
 resultdir: results/
 
-fqdir: trimmed/
+fqdir: fastq/
+
+trimmomatic:
+  adapters: "general/adapters.fasta"
+  seedMisMatches: '2'
+  palindromeClipTreshold: '30'
+  simpleClipThreshold: '10'
+  LeadMinTrimQual: '3'
+  TrailMinTrimQual: '3'
+  windowSize: '4'
+  avgMinQual: '15'
+  minReadLength: '40'
+  phred: "-phred33" # phred: for illumina >1.8 the quality score are encoded by phred33
+  maxLen: "100"
 
 # kallisto fasta file that will be indexed by Kallisto
 kallisto:
-  fasta_ref: /general/transcriptome.fasta
+  fasta_ref: general/transcriptome.fasta
   fragment-length: 90
   sd: 30
   bootstrap: 100
