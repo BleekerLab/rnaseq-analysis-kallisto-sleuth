@@ -19,7 +19,7 @@ RESULT_DIR = config["resultdir"]
 # directory that contains original fastq files
 FQ_DIR = config["fqdir"]
 SAMPLES, = glob_wildcards(FQ_DIR + "{sample}.fq.gz")
-
+print(SAMPLES)
 # read length parameters
 MIN_LEN = 25
 MAX_LEN = 100
@@ -62,7 +62,7 @@ rule copy_master_files_to_results:
 rule estimate_transcript_abundance_using_kallisto:
     input:
         index = "index/kallisto_index.kidx",
-        reads = "/zfs/scratch/mgalland_temp/{sample}.trimmed.fastq"
+        reads = "trimmed/{sample}_qc.fq"
     output:
         "results/kallisto/{sample}/abundance.tsv"
     message:"computing {wildcards.sample} abundances using kallisto"
@@ -95,22 +95,36 @@ rule create_kallisto_index:
 ################
 ## Read trimming
 ################
-rule trim_reads:
-    input:
-         "/zfs/scratch/mgalland_temp/{sample}.fastq"
-    output:
-         "/zfs/scratch/mgalland_temp/{sample}.trimmed.fastq"
-    message:"Trimming {wildcards.sample} reads to 100nts and removing reads shorter than 25nts"
-    shell:
-       """
-         awk 'BEGIN {{tlen=100; lmin=25}} {{ln++; av[ln] =$0}} ln==4 {{if (length($0)>=lmin) {{ printf("%s\\n%s\\n%s\\n%s\\n", av[1],substr(av[2],1,tlen),av[3],substr($0,1,tlen)); }} ln=0; }}'  {input} > {output}
-       """
 
-rule gunzip:
+rule trimmomatic_se:
     input:
         FQ_DIR + "{sample}.fq.gz"
     output:
-        temp("trimmed/{sample}.fq")
-    message:"Unzipping {input} file"
+        "trimmed/{sample}_qc.fq"
+    message: "Trimming single-end {wildcards.sample} reads"
+    log:
+        RESULT_DIR + "logs/trimmomatic_se/{sample}.log"
+    params :
+        seedMisMatches =            str(config['trimmomatic']['seedMisMatches']),
+        palindromeClipTreshold =    str(config['trimmomatic']['palindromeClipTreshold']),
+        simpleClipThreshhold =      str(config['trimmomatic']['simpleClipThreshold']),
+        LeadMinTrimQual =           str(config['trimmomatic']['LeadMinTrimQual']),
+        TrailMinTrimQual =          str(config['trimmomatic']['TrailMinTrimQual']),
+        windowSize =                str(config['trimmomatic']['windowSize']),
+        avgMinQual =                str(config['trimmomatic']['avgMinQual']),
+        minReadLen =                str(config['trimmomatic']['minReadLength']),
+        phred = 		            str(config["trimmomatic"]["phred"]),
+        adapters =                  str(config["trimmomatic"]["adapters"]),
+        maxLen =                    str(config["trimmomatic"]["maxLen"])
+    conda:
+        "../envs/trimmomatic.yaml"
     shell:
-        "zcat {input} > {output}"
+        "trimmomatic SE {params.phred} -threads {THREADS} "
+        "{input} "
+        "{output} "
+        "ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} "
+        "LEADING:{params.LeadMinTrimQual} "
+        "TRAILING:{params.TrailMinTrimQual} "
+        "SLIDINGWINDOW:{params.windowSize}:{params.avgMinQual} "
+        "MINLEN:{params.minReadLen} "
+        "CROP:{params.maxLen}"
