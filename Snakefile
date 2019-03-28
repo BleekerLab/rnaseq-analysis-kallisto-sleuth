@@ -69,8 +69,8 @@ rule estimate_transcript_abundance_using_kallisto:
     params:
         outDir          = "results/kallisto/{sample}/",
         fragmentLength  = str(config["kallisto"]["fragment-length"]),
-		sd              = str(config["kallisto"]["sd"]),
-		bootstrap       = str(config["kallisto"]["bootstrap"])
+        sd              = str(config["kallisto"]["sd"]),
+        bootstrap       = str(config["kallisto"]["bootstrap"])
     log:"results/kallisto/{sample}/log.txt"
     shell:
         "mkdir -p results/kallisto/;"
