@@ -20,9 +20,6 @@ RESULT_DIR = config["resultdir"]
 FQ_DIR = config["fqdir"]
 SAMPLES, = glob_wildcards(FQ_DIR + "{sample}.fq.gz")
 print(SAMPLES)
-# read length parameters
-MIN_LEN = 25
-MAX_LEN = 100
 
 # Threads
 THREADS = 10
