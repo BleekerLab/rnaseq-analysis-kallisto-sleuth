@@ -7,6 +7,10 @@ A Snakemake pipeline to go from mRNA-Seq reads to normalised transcript abundanc
 ############################
 #min_version("5.2.0")
 
+### get liabraries
+
+import pandas as pd
+
 #############################################
 ## Configuration (parameters, samples, units)
 #############################################
@@ -16,13 +20,33 @@ configfile: "config.yaml"
 WORKING_DIR = config["workdir"]
 RESULT_DIR = config["resultdir"]
 
+
+
+units             = pd.read_table(config["units"], dtype=str).set_index(["sample"], drop=False)
 # directory that contains original fastq files
 FQ_DIR = config["fqdir"]
-SAMPLES, = glob_wildcards(FQ_DIR + "{sample}.fq.gz")
+SAMPLES = units.index.get_level_values('sample').unique().tolist()
 print(SAMPLES)
 
 # Threads
 THREADS = 10
+
+def reads_are_SE(sample):
+    """This function detect missing value in the column 2 of the units.tsv"""
+    return pd.isnull(units.loc[(sample), "fq2"])
+
+
+def get_fastq(wildcards):
+    if reads_are_SE(wildcards.sample):
+        return units.loc[(wildcards.sample), ["fq1"]].dropna()
+    else:
+        return units.loc[(wildcards.sample), ["fq1", "fq2"]].dropna()
+
+def get_trimmed(wildcards):
+    if reads_are_SE(wildcards.sample):
+        return wildcards.sample + "_R1_trimmed.fq"
+    else:
+        return [wildcards.sample + "_R1_trimmed.fq", wildcards.sample + "_R2_trimmed.fq"]
 
 ####################
 ## Desired outputs
@@ -59,23 +83,31 @@ rule copy_master_files_to_results:
 rule estimate_transcript_abundance_using_kallisto:
     input:
         index = "index/kallisto_index.kidx",
-        reads = "trimmed/{sample}_qc.fq"
+        reads = get_trimmed
     output:
         "results/kallisto/{sample}/abundance.tsv"
     message:"computing {wildcards.sample} abundances using kallisto"
     params:
+        sampleName      = "{sample}",
         outDir          = "results/kallisto/{sample}/",
         fragmentLength  = str(config["kallisto"]["fragment-length"]),
         sd              = str(config["kallisto"]["sd"]),
         bootstrap       = str(config["kallisto"]["bootstrap"])
-    log:"results/kallisto/{sample}/log.txt"
-    shell:
-        "mkdir -p results/kallisto/;"
-        "kallisto quant -i {input.index} -o {params.outDir} "
-        "--single -l {params.fragmentLength} -s {params.sd} "			# average fragment length of 180 nts
-        "-b {params.bootstrap} "					# number of bootstraps
-        "--threads {THREADS} "
-        "{input.reads} 2>{log}"
+    run:
+        if reads_are_SE(params.sampleName):
+            shell("mkdir -p results/kallisto/; \
+            kallisto quant -i {input.index} -o {params.outDir} \
+            --single -l {params.fragmentLength} -s {params.sd} \
+            -b {params.bootstrap} \
+            --threads {THREADS} \
+            {input.reads}")
+        else:
+            shell("mkdir -p results/kallisto/; \
+            kallisto quant -i {input.index} -o {params.outDir} \
+            -b {params.bootstrap} \
+            --threads {THREADS} \
+            {input.reads}")
+
 
 rule create_kallisto_index:
     input:
@@ -93,15 +125,19 @@ rule create_kallisto_index:
 ## Read trimming
 ################
 
-rule trimmomatic_se:
+rule trimmomatic:
     input:
-        FQ_DIR + "{sample}.fq.gz"
+        get_fastq
     output:
-        "trimmed/{sample}_qc.fq"
+        fq1 = "{sample}_R1_trimmed.fq",
+        fq2 = "{sample}_R2_trimmed.fq"
     message: "Trimming single-end {wildcards.sample} reads"
     log:
         RESULT_DIR + "logs/trimmomatic_se/{sample}.log"
     params :
+        naam =                      "{sample}",
+        fq3 =                       "{sample}_R1_trimmed_unpaired.fq",
+        fq4 =                       "{sample}_R2_trimmed_unpaired.fq",
         seedMisMatches =            str(config['trimmomatic']['seedMisMatches']),
         palindromeClipTreshold =    str(config['trimmomatic']['palindromeClipTreshold']),
         simpleClipThreshhold =      str(config['trimmomatic']['simpleClipThreshold']),
@@ -113,15 +149,21 @@ rule trimmomatic_se:
         phred = 		            str(config["trimmomatic"]["phred"]),
         adapters =                  str(config["trimmomatic"]["adapters"]),
         maxLen =                    str(config["trimmomatic"]["maxLen"])
-    conda:
-        "../envs/trimmomatic.yaml"
-    shell:
-        "trimmomatic SE {params.phred} -threads {THREADS} "
-        "{input} "
-        "{output} "
-        "ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} "
-        "LEADING:{params.LeadMinTrimQual} "
-        "TRAILING:{params.TrailMinTrimQual} "
-        "SLIDINGWINDOW:{params.windowSize}:{params.avgMinQual} "
-        "MINLEN:{params.minReadLen} "
-        "CROP:{params.maxLen}"
+    run:
+        if reads_are_SE(params.naam):
+            shell("trimmomatic SE {params.phred} -threads {THREADS} \
+			{input} {output.fq1} \
+			ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} \
+			LEADING:{params.LeadMinTrimQual} \
+			TRAILING:{params.TrailMinTrimQual} \
+			SLIDINGWINDOW:{params.windowSize}:{params.avgMinQual} \
+			MINLEN:{params.minReadLen} CROP:{params.maxLen} ;\
+			touch {output.fq2}")
+        else:
+            shell("trimmomatic PE {params.phred} -threads {THREADS} \
+			{input} {output.fq1} {params.fq3} {output.fq2} {params.fq4} \
+			ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} \
+			LEADING:{params.LeadMinTrimQual} \
+			TRAILING:{params.TrailMinTrimQual} \
+			SLIDINGWINDOW:{params.windowSize}:{params.avgMinQual} \
+			MINLEN:{params.minReadLen} CROP:{params.maxLen}")
