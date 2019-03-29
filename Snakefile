@@ -8,7 +8,6 @@ A Snakemake pipeline to go from mRNA-Seq reads to normalised transcript abundanc
 #min_version("5.2.0")
 
 ### get liabraries
-
 import pandas as pd
 
 #############################################
@@ -18,13 +17,14 @@ import pandas as pd
 configfile: "config.yaml"
 
 WORKING_DIR = config["workdir"]
-RESULT_DIR = config["resultdir"]
+RESULT_DIR  = config["resultdir"]
 
 
+# get list of samples
+units   = pd.read_table(config["units"], dtype=str).set_index(["sample"], drop=False)
 
-units             = pd.read_table(config["units"], dtype=str).set_index(["sample"], drop=False)
 # directory that contains original fastq files
-FQ_DIR = config["fqdir"]
+FQ_DIR  = config["fqdir"]
 SAMPLES = units.index.get_level_values('sample').unique().tolist()
 print(SAMPLES)
 
@@ -35,14 +35,17 @@ def reads_are_SE(sample):
     """This function detect missing value in the column 2 of the units.tsv"""
     return pd.isnull(units.loc[(sample), "fq2"])
 
-
 def get_fastq(wildcards):
+	""" This function checks if sample is paired end or single end
+	and returns 1 or 2 names of the fastq files """
     if reads_are_SE(wildcards.sample):
         return units.loc[(wildcards.sample), ["fq1"]].dropna()
     else:
         return units.loc[(wildcards.sample), ["fq1", "fq2"]].dropna()
 
 def get_trimmed(wildcards):
+	""" This function checks if sample is paired end or single end
+	and returns 1 or 2 names of the trimmed fastq files """
     if reads_are_SE(wildcards.sample):
         return wildcards.sample + "_R1_trimmed.fq"
     else:
