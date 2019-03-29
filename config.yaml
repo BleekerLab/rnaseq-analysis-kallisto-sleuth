@@ -1,9 +1,11 @@
 ---
 
+units : samples.tsv
+
 workdir: scratch/
 resultdir: results/
 
-fqdir: fastq/
+fqdir: data/
 
 trimmomatic:
   adapters: "general/adapters.fasta"
