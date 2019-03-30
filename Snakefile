@@ -19,7 +19,6 @@ configfile: "config.yaml"
 WORKING_DIR = config["workdir"]
 RESULT_DIR  = config["resultdir"]
 
-
 # get list of samples
 units   = pd.read_table(config["units"], dtype=str).set_index(["sample"], drop=False)
 
@@ -30,6 +29,10 @@ print(SAMPLES)
 
 # Threads
 THREADS = 10
+
+##########################################
+## Functions required to fetch input files
+##########################################
 
 def reads_are_SE(sample):
     """This function detect missing value in the column 2 of the units.tsv"""
@@ -51,9 +54,10 @@ def get_trimmed(wildcards):
     else:
         return [wildcards.sample + "_R1_trimmed.fq", wildcards.sample + "_R2_trimmed.fq"]
 
-####################
+##################
 ## Desired outputs
-####################
+##################
+
 KALLISTO = expand("results/kallisto/{samples}/abundance.tsv",samples=SAMPLES)
 MASTERS = ["results/Snakefile","results/config.yaml","environment.yaml"]
 
@@ -63,9 +67,10 @@ rule all:
 		MASTERS
 	message:"all done"
 
-################################
+###############################
 ## Copy master files to results
-##############################
+###############################
+
 rule copy_master_files_to_results:
     input:
         "Snakefile",
@@ -83,6 +88,7 @@ rule copy_master_files_to_results:
 ##############################################################################
 ## Kallisto (pseudo-alignment) analysis for transcriptome and custom databases
 ##############################################################################
+
 rule estimate_transcript_abundance_using_kallisto:
     input:
         index = "index/kallisto_index.kidx",
@@ -124,9 +130,9 @@ rule create_kallisto_index:
         "kallisto index --make-unique -i {params} {input};"
         "mv {params} index/"
 
-################
-## Read trimming
-################
+########################################################
+## Read trimming of adapters, quality and max/min length
+########################################################
 
 rule trimmomatic:
     input:
