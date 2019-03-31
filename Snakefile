@@ -19,6 +19,7 @@ configfile: "config.yaml"
 WORKING_DIR = config["workdir"]
 RESULT_DIR  = config["resultdir"]
 
+
 # get list of samples
 units   = pd.read_table(config["units"], dtype=str).set_index(["sample"], drop=False)
 
@@ -30,34 +31,32 @@ print(SAMPLES)
 # Threads
 THREADS = 10
 
-##########################################
-## Functions required to fetch input files
-##########################################
-
 def reads_are_SE(sample):
     """This function detect missing value in the column 2 of the units.tsv"""
-    return pd.isnull(units.loc[(sample), "fq2"])
+    if "fq2" not in units.columns:
+        return True
+    else:
+        return pd.isnull(units.loc[(sample), "fq2"])
 
 def get_fastq(wildcards):
 	""" This function checks if sample is paired end or single end
-	and returns a pair or single fastq file """
-    if reads_are_SE(wildcards.sample):
-        return units.loc[(wildcards.sample), ["fq1"]].dropna()
-    else:
-        return units.loc[(wildcards.sample), ["fq1", "fq2"]].dropna()
+	and returns 1 or 2 names of the fastq files """
+	if reads_are_SE(wildcards.sample):
+		return units.loc[(wildcards.sample), ["fq1"]].dropna()
+	else:
+		return units.loc[(wildcards.sample), ["fq1", "fq2"]].dropna()
 
 def get_trimmed(wildcards):
 	""" This function checks if sample is paired end or single end
-	and returns a pair or single filename """
-    if reads_are_SE(wildcards.sample):
-        return wildcards.sample + "_R1_trimmed.fq"
-    else:
-        return [wildcards.sample + "_R1_trimmed.fq", wildcards.sample + "_R2_trimmed.fq"]
+	and returns 1 or 2 names of the trimmed fastq files """
+	if reads_are_SE(wildcards.sample):
+		return wildcards.sample + "_R1_trimmed.fq"
+	else:
+		return [wildcards.sample + "_R1_trimmed.fq", wildcards.sample + "_R2_trimmed.fq"]
 
-##################
+####################
 ## Desired outputs
-##################
-
+####################
 KALLISTO = expand("results/kallisto/{samples}/abundance.tsv",samples=SAMPLES)
 MASTERS = ["results/Snakefile","results/config.yaml","environment.yaml"]
 
@@ -67,10 +66,9 @@ rule all:
 		MASTERS
 	message:"all done"
 
-###############################
+################################
 ## Copy master files to results
-###############################
-
+##############################
 rule copy_master_files_to_results:
     input:
         "Snakefile",
@@ -88,7 +86,6 @@ rule copy_master_files_to_results:
 ##############################################################################
 ## Kallisto (pseudo-alignment) analysis for transcriptome and custom databases
 ##############################################################################
-
 rule estimate_transcript_abundance_using_kallisto:
     input:
         index = "index/kallisto_index.kidx",
@@ -130,9 +127,9 @@ rule create_kallisto_index:
         "kallisto index --make-unique -i {params} {input};"
         "mv {params} index/"
 
-########################################################
-## Read trimming of adapters, quality and max/min length
-########################################################
+################
+## Read trimming
+################
 
 rule trimmomatic:
     input:
@@ -144,7 +141,7 @@ rule trimmomatic:
     log:
         RESULT_DIR + "logs/trimmomatic_se/{sample}.log"
     params :
-        sampleName =                "{sample}",
+        naam =                      "{sample}",
         fq3 =                       "{sample}_R1_trimmed_unpaired.fq",
         fq4 =                       "{sample}_R2_trimmed_unpaired.fq",
         seedMisMatches =            str(config['trimmomatic']['seedMisMatches']),
@@ -159,7 +156,7 @@ rule trimmomatic:
         adapters =                  str(config["trimmomatic"]["adapters"]),
         maxLen =                    str(config["trimmomatic"]["maxLen"])
     run:
-        if reads_are_SE(params.sampleName):
+        if reads_are_SE(params.naam):
             shell("trimmomatic SE {params.phred} -threads {THREADS} \
 			{input} {output.fq1} \
 			ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} \
