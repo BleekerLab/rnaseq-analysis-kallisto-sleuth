@@ -61,10 +61,10 @@ The 'sample.tsv' will then look something like this:
 
 | sample   | genotype | fq1 |
 | ------- | ---------- |-----|
-| sample1 | w.t. | readsS1_R1.fastq |
-| sample2 | w.t. | readsS2_R1.fastq |
-| sample3 | mutant | readsS3_R1.fastq |
-| sample4 | mutant | readsS4_R1.fastq |
+| sample1 | w.t. | readsS1.fastq |
+| sample2 | w.t. | readsS2.fastq |
+| sample3 | mutant | readsS3.fastq |
+| sample4 | mutant | readsS4.fastq |
 
 
 If the experiment contains both single and paired end reads, it should be something like this:
