@@ -7,9 +7,9 @@ A Snakemake pipeline to go from mRNA-Seq reads to normalised transcript abundanc
 ############################
 #min_version("5.2.0")
 
-###########
-# Libraries
-###########
+############
+## Libraries
+############
 
 import pandas as pd
 
