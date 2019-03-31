@@ -150,7 +150,7 @@ rule trimmomatic:
     log:
         RESULT_DIR + "logs/trimmomatic_se/{sample}.log"
     params :
-        naam =                      "{sample}",
+        sampleName =                "{sample}",
         fq3 =                       "{sample}_R1_trimmed_unpaired.fq",
         fq4 =                       "{sample}_R2_trimmed_unpaired.fq",
         seedMisMatches =            str(config['trimmomatic']['seedMisMatches']),
@@ -165,7 +165,7 @@ rule trimmomatic:
         adapters =                  str(config["trimmomatic"]["adapters"]),
         maxLen =                    str(config["trimmomatic"]["maxLen"])
     run:
-        if reads_are_SE(params.naam):
+        if reads_are_SE(params.sampleName):
             shell("trimmomatic SE {params.phred} -threads {THREADS} \
 			{input} {output.fq1} \
 			ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} \
