@@ -18,7 +18,7 @@ This pipeline analyses the raw RNA-seq data and produce a file containing normal
 - `config.yaml`: the configuration files making the Snakefile adaptable to any input files, transcriptome and parameters for the rules.
 - `fastq/`: This folder should contain pairs of paired-end reads, single-end, or a mixture of paired and single-end reads in fastq format.
 - `envs/`: a folder containing the environments needed for the conda package manager. If run with the `--use-conda` command, Snakemake will install the necessary softwares and packages using the conda environment files.
-- `samples.tsv`:  a file containing information about the names, the paths and the conditions of the samples used. Column name of the sample names needs to be "sample", columns containing the paths to and the names of the forward and reverse fastq files need to be named "fq1" and "fq2". In case of only using sinle-end reads, the column "fq2" can be omitted.
+- `samples.tsv`:  a file containing information about the names, the paths and the conditions of the samples used. 
 **This file has to be adapted to your sample names before running the pipeline**.
 
 
@@ -39,6 +39,41 @@ The Snakefile will then take care of installing and loading the packages and sof
 ## Configuration file
 Make sure you have changed the parameters in the `config.yaml` file that specifies where to find the sample data file, the genomic and transcriptomic reference fasta files to use and the parameters for certains rules etc.  
 This file is used so the `Snakefile` does not need to be changed when locations or parameters need to be changed.
+
+## Experimental design
+To get the right reads to the samples the 'sample.tsv' needs to contain certain features.
+the column name of the column comtaining the sample names needs to be 'sample'
+the column names of of the columns containg the forward and reverse reads need to be 'fq1' and 'fq2'
+
+example of a file for an experiment containing piared end reads:
+
+| sample   | treatment | fq1 | fq2 |
+| ------- | ---------- |-----|-----|
+| sample1 | control | readsS1_R1.fastq | readsS1_R2.fastq |
+| sample2 | control | readsS2_R1.fastq | readsS2_R2.fastq |
+| sample3 | treated | readsS3_R1.fastq | readsS3_R2.fastq |
+| sample4 | treated | readsS4_R1.fastq | readsS4_R2.fastq |
+
+
+In case of an experiment containing only single-end reads, the column 'fq2' can be omitted.
+The 'sample.tsv' will then look something like this:
+
+| sample   | genotype | fq1 |
+| ------- | ---------- |-----|
+| sample1 | w.t. | readsS1_R1.fastq |
+| sample2 | w.t. | readsS2_R1.fastq |
+| sample3 | mutant | readsS3_R1.fastq |
+| sample4 | mutant | readsS4_R1.fastq |
+
+
+If the experiment contains both single and paired end reads, it should be something like this:
+
+| sample   | condition | fq1 | fq2 |
+| ------- | ---------- |-----|-----|
+| sample1 | control | readsS1_R1.fastq | readsS1_R2 |
+| sample2 | control | readsS2.fastq | |
+| sample3 | drought | readsS3_R1.fastq | readsS3_R2 |
+| sample4 | drought | readsS4.fastq | |
 
 ## Snakemake execution
 The Snakemake pipeline/workflow management system reads a master file (often called `Snakefile`) to list the steps to be executed and defining their order. It has many rich features. Read more [here](https://snakemake.readthedocs.io/en/stable/).
