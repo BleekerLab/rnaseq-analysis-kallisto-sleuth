@@ -32,7 +32,7 @@ You will need a local copy of the `rnaseq-analysis-kallisto-sleuth` on your mach
 ## Installing and activating a virtual environment
 First, you need to create an environment where `Snakemake` and the python `pandas`package will be installed. To do that, we will use the conda package manager.   
 1. Create a virtual environment named `rnaseq` using the `environment.yaml` file with the following command: `conda env create --name rnaseq --file environment.yaml`
-    Then, activate this virtual environment with 'source activate rnaseq' (or 'conda activate rnaseq')
+    Then, activate this virtual environment with `source activate rnaseq` (or  `conda activate rnaseq` )
 
 The Snakefile will then take care of installing and loading the packages and softwares required by each step of the pipeline.
 
@@ -40,7 +40,7 @@ The Snakefile will then take care of installing and loading the packages and sof
 Make sure you have changed the parameters in the `config.yaml` file that specifies where to find the sample data file, the genomic and transcriptomic reference fasta files to use and the parameters for certains rules etc.  
 This file is used so the `Snakefile` does not need to be changed when locations or parameters need to be changed.
 
-## Experimental design
+## Experimental design (sample.tsv)
 To get the right reads to the samples the 'sample.tsv' needs to contain certain features.
 the column name of the column comtaining the sample names needs to be 'sample'
 the column names of of the columns containg the forward and reverse reads need to be 'fq1' and 'fq2'
