@@ -7,7 +7,7 @@ A snakemake pipeline for the analysis of RNA-seq data that makes use of [Kallist
 [![Miniconda](https://img.shields.io/badge/miniconda-blue.svg)](https://conda.io/miniconda)
 
 # Aim
-To align, count, normalize couts and compute gene differential expressions between conditions using single-end, paired-end or a mixture of both Illumina RNA-seq data.
+To align, count, normalize counts and compute differential gene expressions between conditions using single-end, paired-end or a mixture of both Illumina RNA-seq data.
 
 # Description
 This pipeline analyses the raw RNA-seq data and produce a file containing normalized counts and differential expressions. The raw fastq files will be trimmed for adaptors and quality checked with trimmomatic. Next, the trimmed reads are mapped and counted to produce abundance files against the transcriptome fasta file using kallisto. The counts are normalized and differential expressions are calculated using sleuth.
@@ -44,6 +44,7 @@ This file is used so the `Snakefile` does not need to be changed when locations 
 To get the right reads to the samples the 'sample.tsv' needs to contain certain features.
 the column name of the column comtaining the sample names needs to be 'sample'
 the column names of of the columns containg the forward and reverse reads need to be 'fq1' and 'fq2'
+the column containing conditions, genotypes, treatment, etc is free of choise. 
 
 example of a file for an experiment containing piared end reads:
 
@@ -70,9 +71,9 @@ If the experiment contains both single and paired end reads, it should be someth
 
 | sample   | condition | fq1 | fq2 |
 | ------- | ---------- |-----|-----|
-| sample1 | control | readsS1_R1.fastq | readsS1_R2 |
+| sample1 | control | readsS1_R1.fastq | readsS1_R2.fastq |
 | sample2 | control | readsS2.fastq | |
-| sample3 | drought | readsS3_R1.fastq | readsS3_R2 |
+| sample3 | drought | readsS3_R1.fastq | readsS3_R2.fastq |
 | sample4 | drought | readsS4.fastq | |
 
 ## Snakemake execution
