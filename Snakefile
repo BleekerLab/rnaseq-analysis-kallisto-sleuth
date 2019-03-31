@@ -7,29 +7,36 @@ A Snakemake pipeline to go from mRNA-Seq reads to normalised transcript abundanc
 ############################
 #min_version("5.2.0")
 
-### get liabraries
+###########
+# Libraries
+###########
+
 import pandas as pd
 
-#############################################
-## Configuration (parameters, samples, units)
-#############################################
+###############
+# Configuration
+###############
 
 configfile: "config.yaml"
 
 WORKING_DIR = config["workdir"]
 RESULT_DIR  = config["resultdir"]
-
-
-# get list of samples
-units   = pd.read_table(config["units"], dtype=str).set_index(["sample"], drop=False)
-
-# directory that contains original fastq files
 FQ_DIR  = config["fqdir"]
+
+########################
+# Samples and conditions
+########################
+
+units = pd.read_table(config["units"], dtype=str).set_index(["sample"], drop=False)
 SAMPLES = units.index.get_level_values('sample').unique().tolist()
-print(SAMPLES)
+
 
 # Threads
 THREADS = 10
+
+############################
+## Input functions for rules
+############################
 
 def reads_are_SE(sample):
     """This function detect missing value in the column 2 of the units.tsv"""
@@ -54,9 +61,10 @@ def get_trimmed(wildcards):
 	else:
 		return [wildcards.sample + "_R1_trimmed.fq", wildcards.sample + "_R2_trimmed.fq"]
 
-####################
+##################
 ## Desired outputs
-####################
+##################
+
 KALLISTO = expand("results/kallisto/{samples}/abundance.tsv",samples=SAMPLES)
 MASTERS = ["results/Snakefile","results/config.yaml","environment.yaml"]
 
@@ -86,6 +94,7 @@ rule copy_master_files_to_results:
 ##############################################################################
 ## Kallisto (pseudo-alignment) analysis for transcriptome and custom databases
 ##############################################################################
+
 rule estimate_transcript_abundance_using_kallisto:
     input:
         index = "index/kallisto_index.kidx",
