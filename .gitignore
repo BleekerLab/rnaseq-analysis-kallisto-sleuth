@@ -1,2 +1,5 @@
 *.snakemake
 *data/*.fastq
+*DS_Store*
+*results/*
+*scratch/*

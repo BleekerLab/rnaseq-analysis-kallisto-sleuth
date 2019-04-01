@@ -53,15 +53,15 @@ def get_trimmed(wildcards):
 	""" This function checks if sample is paired end or single end
 	and returns 1 or 2 names of the trimmed fastq files """
 	if sample_is_single_end(wildcards.sample):
-		return wildcards.sample + "_R1_trimmed.fq.gz"
+		return WORKING_DIR + wildcards.sample + "_R1_trimmed.fq.gz"
 	else:
-		return [wildcards.sample + "_R1_trimmed.fq.gz", wildcards.sample + "_R2_trimmed.fq.gz"]
+		return [WORKING_DIR + wildcards.sample + "_R1_trimmed.fq.gz", WORKING_DIR + wildcards.sample + "_R2_trimmed.fq.gz"]
 
 ##################
 ## Desired outputs
 ##################
 
-KALLISTO = expand("results/kallisto/{samples}/abundance.tsv",samples=SAMPLES)
+KALLISTO = expand(RESULT_DIR + "kallisto/{samples}/abundance.tsv",samples=SAMPLES)
 MASTERS = ["results/Snakefile","results/config.yaml","environment.yaml"]
 
 rule all:
@@ -69,6 +69,8 @@ rule all:
 		KALLISTO,
 		MASTERS
 	message:"all done"
+    #shell:
+#        "rm -r {WORKING_DIR}"
 
 ################################
 ## Copy master files to results
@@ -96,10 +98,11 @@ rule estimate_transcript_abundance_using_kallisto:
         index = "index/kallisto_index.kidx",
         reads = get_trimmed
     output:
-        "results/kallisto/{sample}/abundance.tsv"
+        RESULT_DIR + "kallisto/{sample}/abundance.tsv"
     message:"computing {wildcards.sample} abundances using kallisto"
     conda:
         "envs/kallisto.yaml"
+    threads: 10
     params:
         sampleName      = "{sample}",
         outDir          = "results/kallisto/{sample}/",
@@ -112,13 +115,13 @@ rule estimate_transcript_abundance_using_kallisto:
             kallisto quant -i {input.index} -o {params.outDir} \
             --single -l {params.fragmentLength} -s {params.sd} \
             -b {params.bootstrap} \
-            --threads {THREADS} \
+            --threads {threads} \
             {input.reads}")
         else:
             shell("mkdir -p results/kallisto/; \
             kallisto quant -i {input.index} -o {params.outDir} \
             -b {params.bootstrap} \
-            --threads {THREADS} \
+            --threads {threads} \
             {input.reads}")
 
 
@@ -144,8 +147,8 @@ rule trimmomatic:
     input:
         get_fastq
     output:
-        fq1 = "{sample}_R1_trimmed.fq.gz",
-        fq2 = "{sample}_R2_trimmed.fq.gz"
+        fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
+        fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz"
     message: "Trimming single-end {wildcards.sample} reads"
     conda:
         "envs/trimmomatic.yaml"
@@ -153,8 +156,8 @@ rule trimmomatic:
         RESULT_DIR + "logs/trimmomatic_se/{sample}.log"
     params :
         sampleName =                "{sample}",
-        fq1_unpaired =                       "{sample}_R1_trimmed_unpaired.fq",
-        fq2_unpaired =                       "{sample}_R2_trimmed_unpaired.fq",
+        fq1_unpaired =              WORKING_DIR + "{sample}_R1_trimmed_unpaired.fq",
+        fq2_unpaired =              WORKING_DIR + "{sample}_R2_trimmed_unpaired.fq",
         seedMisMatches =            str(config['trimmomatic']['seedMisMatches']),
         palindromeClipTreshold =    str(config['trimmomatic']['palindromeClipTreshold']),
         simpleClipThreshhold =      str(config['trimmomatic']['simpleClipThreshold']),
@@ -168,19 +171,19 @@ rule trimmomatic:
         maxLen =                    str(config["trimmomatic"]["maxLen"])
     run:
         if sample_is_single_end(params.sampleName):
-            shell("trimmomatic SE {params.phred} -threads {THREADS} \
+            shell("trimmomatic SE {params.phred} -threads {threads} \
 			{input} {output.fq1} \
 			ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} \
 			LEADING:{params.LeadMinTrimQual} \
 			TRAILING:{params.TrailMinTrimQual} \
 			SLIDINGWINDOW:{params.windowSize}:{params.avgMinQual} \
-			MINLEN:{params.minReadLen} CROP:{params.maxLen} ;\
+			MINLEN:{params.minReadLen} CROP:{params.maxLen} 2>{log};\
 			touch {output.fq2}")
         else:
-            shell("trimmomatic PE {params.phred} -threads {THREADS} \
+            shell("trimmomatic PE {params.phred} -threads {threads} \
 			{input} {output.fq1} {params.fq1_unpaired} {output.fq2} {params.fq2_unpaired} \
 			ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} \
 			LEADING:{params.LeadMinTrimQual} \
 			TRAILING:{params.TrailMinTrimQual} \
 			SLIDINGWINDOW:{params.windowSize}:{params.avgMinQual} \
-			MINLEN:{params.minReadLen} CROP:{params.maxLen}")
+			MINLEN:{params.minReadLen} CROP:{params.maxLen} 2>{log}")

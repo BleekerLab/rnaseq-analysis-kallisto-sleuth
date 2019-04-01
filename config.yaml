@@ -22,7 +22,7 @@ trimmomatic:
 
 # kallisto fasta file that will be indexed by Kallisto
 kallisto:
-  fasta_ref: refs/ITAG3.2_cDNA.fasta
+  fasta_ref: refs/ITAG3.2_cDNA.sub.fasta
   fragment-length: 90
   sd: 30
   bootstrap: 100
