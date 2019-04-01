@@ -18,7 +18,7 @@ This pipeline analyses the raw RNA-seq data and produce a file containing normal
 - `config.yaml`: the configuration files making the Snakefile adaptable to any input files, transcriptome and parameters for the rules.
 - `fastq/`: This folder should contain pairs of paired-end reads, single-end, or a mixture of paired and single-end reads in fastq format.
 - `envs/`: a folder containing the environments needed for the conda package manager. If run with the `--use-conda` command, Snakemake will install the necessary softwares and packages using the conda environment files.
-- `samples.tsv`:  a file containing information about the names, the paths and the conditions of the samples used. 
+- `samples.tsv`:  a file containing information about the names, the paths and the conditions of the samples used.
 **This file has to be adapted to your sample names before running the pipeline**.
 
 
@@ -31,20 +31,22 @@ You will need a local copy of the `rnaseq-analysis-kallisto-sleuth` on your mach
 
 ## Installing and activating a virtual environment
 First, you need to create an environment where `Snakemake` and the python `pandas`package will be installed. To do that, we will use the conda package manager.   
-1. Create a virtual environment named `rnaseq` using the `environment.yaml` file with the following command: `conda env create --name rnaseq --file environment.yaml`
-    Then, activate this virtual environment with `source activate rnaseq` (or  `conda activate rnaseq` )
-
-The Snakefile will then take care of installing and loading the packages and softwares required by each step of the pipeline.
+1. Create a virtual environment named `rnaseq` using the `environment.yaml` file with the following command: `conda env create --file environment.yaml`
+2. Then, activate this virtual environment with `source activate rnaseq` or  `conda activate rnaseq` (with `conda =>4.5.0`)
+By using the software and package manager conda, Snakemake will then take care of installing and loading the packages and softwares required by each step of the pipeline.
 
 ## Configuration file
-Make sure you have changed the parameters in the `config.yaml` file that specifies where to find the sample data file, the genomic and transcriptomic reference fasta files to use and the parameters for certains rules etc.  
+Make sure you have changed the parameters in the `config.yaml` file that specifies where to find:
+- the sample data file `samples.tsv`
+- the genomic and transcriptomic reference fasta files
+- various parameters for certain softwares etc.    
 This file is used so the `Snakefile` does not need to be changed when locations or parameters need to be changed.
 
-## Experimental design (sample.tsv)
+## Experimental design (samples.tsv)
 To get the right reads to the samples the 'sample.tsv' needs to contain certain features.
 the column name of the column comtaining the sample names needs to be 'sample'
 the column names of of the columns containg the forward and reverse reads need to be 'fq1' and 'fq2'
-the column containing conditions, genotypes, treatment, etc is free of choise. 
+the column containing conditions, genotypes, treatment, etc is free of choise.
 
 example of a file for an experiment containing piared end reads:
 
