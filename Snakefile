@@ -94,7 +94,7 @@ rule copy_master_files_to_results:
 
 rule estimate_transcript_abundance_using_kallisto:
     input:
-        index = "index/kallisto_index.kidx",
+        index = WORKING_DIR + "index/kallisto_index.kidx",
         reads = get_trimmed
     output:
         RESULT_DIR + "kallisto/{sample}/abundance.tsv"
@@ -128,7 +128,7 @@ rule create_kallisto_index:
     input:
          fasta = config["kallisto"]["fasta_ref"]
     output:
-         "index/kallisto_index.kidx"
+         WORKING_DIR + "index/kallisto_index.kidx"
     params:
         "kallisto_index.kidx"
     message:"creating kallisto index"
