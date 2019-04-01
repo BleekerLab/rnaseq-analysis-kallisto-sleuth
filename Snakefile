@@ -30,15 +30,11 @@ FQ_DIR  = config["fqdir"]
 units = pd.read_table(config["units"], dtype=str).set_index(["sample"], drop=False)
 SAMPLES = units.index.get_level_values('sample').unique().tolist()
 
-
-# Threads
-THREADS = 10
-
 ############################
 ## Input functions for rules
 ############################
 
-def reads_are_SE(sample):
+def sample_is_single_end(sample):
     """This function detect missing value in the column 2 of the units.tsv"""
     if "fq2" not in units.columns:
         return True
@@ -46,9 +42,9 @@ def reads_are_SE(sample):
         return pd.isnull(units.loc[(sample), "fq2"])
 
 def get_fastq(wildcards):
-	""" This function checks if sample is paired end or single end
+	""" This function checks if the sample has paired end or single end reads
 	and returns 1 or 2 names of the fastq files """
-	if reads_are_SE(wildcards.sample):
+	if sample_is_single_end(wildcards.sample):
 		return units.loc[(wildcards.sample), ["fq1"]].dropna()
 	else:
 		return units.loc[(wildcards.sample), ["fq1", "fq2"]].dropna()
@@ -56,10 +52,10 @@ def get_fastq(wildcards):
 def get_trimmed(wildcards):
 	""" This function checks if sample is paired end or single end
 	and returns 1 or 2 names of the trimmed fastq files """
-	if reads_are_SE(wildcards.sample):
-		return wildcards.sample + "_R1_trimmed.fq"
+	if sample_is_single_end(wildcards.sample):
+		return wildcards.sample + "_R1_trimmed.fq.gz"
 	else:
-		return [wildcards.sample + "_R1_trimmed.fq", wildcards.sample + "_R2_trimmed.fq"]
+		return [wildcards.sample + "_R1_trimmed.fq.gz", wildcards.sample + "_R2_trimmed.fq.gz"]
 
 ##################
 ## Desired outputs
@@ -109,7 +105,7 @@ rule estimate_transcript_abundance_using_kallisto:
         sd              = str(config["kallisto"]["sd"]),
         bootstrap       = str(config["kallisto"]["bootstrap"])
     run:
-        if reads_are_SE(params.sampleName):
+        if sample_is_single_end(params.sampleName):
             shell("mkdir -p results/kallisto/; \
             kallisto quant -i {input.index} -o {params.outDir} \
             --single -l {params.fragmentLength} -s {params.sd} \
@@ -144,15 +140,15 @@ rule trimmomatic:
     input:
         get_fastq
     output:
-        fq1 = "{sample}_R1_trimmed.fq",
-        fq2 = "{sample}_R2_trimmed.fq"
+        fq1 = "{sample}_R1_trimmed.fq.gz",
+        fq2 = "{sample}_R2_trimmed.fq.gz"
     message: "Trimming single-end {wildcards.sample} reads"
     log:
         RESULT_DIR + "logs/trimmomatic_se/{sample}.log"
     params :
         sampleName =                "{sample}",
-        fq3 =                       "{sample}_R1_trimmed_unpaired.fq",
-        fq4 =                       "{sample}_R2_trimmed_unpaired.fq",
+        fq1_unpaired =                       "{sample}_R1_trimmed_unpaired.fq",
+        fq2_unpaired =                       "{sample}_R2_trimmed_unpaired.fq",
         seedMisMatches =            str(config['trimmomatic']['seedMisMatches']),
         palindromeClipTreshold =    str(config['trimmomatic']['palindromeClipTreshold']),
         simpleClipThreshhold =      str(config['trimmomatic']['simpleClipThreshold']),
@@ -165,7 +161,7 @@ rule trimmomatic:
         adapters =                  str(config["trimmomatic"]["adapters"]),
         maxLen =                    str(config["trimmomatic"]["maxLen"])
     run:
-        if reads_are_SE(params.sampleName):
+        if sample_is_single_end(params.sampleName):
             shell("trimmomatic SE {params.phred} -threads {THREADS} \
 			{input} {output.fq1} \
 			ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} \
@@ -176,7 +172,7 @@ rule trimmomatic:
 			touch {output.fq2}")
         else:
             shell("trimmomatic PE {params.phred} -threads {THREADS} \
-			{input} {output.fq1} {params.fq3} {output.fq2} {params.fq4} \
+			{input} {output.fq1} {params.fq1_unpaired} {output.fq2} {params.fq2_unpaired} \
 			ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} \
 			LEADING:{params.LeadMinTrimQual} \
 			TRAILING:{params.TrailMinTrimQual} \

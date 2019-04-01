@@ -8,7 +8,7 @@ resultdir: results/
 fqdir: data/
 
 trimmomatic:
-  adapters: "general/adapters.fasta"
+  adapters: "refs/adapters.fasta"
   seedMisMatches: '2'
   palindromeClipTreshold: '30'
   simpleClipThreshold: '10'
@@ -22,7 +22,7 @@ trimmomatic:
 
 # kallisto fasta file that will be indexed by Kallisto
 kallisto:
-  fasta_ref: general/transcriptome.fasta
+  fasta_ref: refs/ITAG3.2_cDNA.fasta
   fragment-length: 90
   sd: 30
   bootstrap: 100
