@@ -90,3 +90,6 @@ For cluster execution, please refer to the [Snakemake reference](https://snakema
 
 # Main outputs
 - the transcript abundance files abundance.tsv
+
+# Graph of jobs
+![dag.png](./dag.png)
