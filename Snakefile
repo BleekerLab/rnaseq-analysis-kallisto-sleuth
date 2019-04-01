@@ -26,9 +26,8 @@ FQ_DIR  = config["fqdir"]
 ########################
 # Samples and conditions
 ########################
-
-units = pd.read_table(config["units"], dtype=str).set_index(["sample"], drop=False)
-SAMPLES = units.index.get_level_values('sample').unique().tolist()
+samples = pd.read_csv("samples.tsv", dtype=str,index_col=0,sep="\t")
+SAMPLES = samples.index.get_level_values('sample').unique().tolist()
 
 ############################
 ## Input functions for rules
@@ -36,18 +35,18 @@ SAMPLES = units.index.get_level_values('sample').unique().tolist()
 
 def sample_is_single_end(sample):
     """This function detect missing value in the column 2 of the units.tsv"""
-    if "fq2" not in units.columns:
+    if "fq2" not in samples.columns:
         return True
     else:
-        return pd.isnull(units.loc[(sample), "fq2"])
+        return pd.isnull(samples.loc[(sample), "fq2"])
 
 def get_fastq(wildcards):
 	""" This function checks if the sample has paired end or single end reads
 	and returns 1 or 2 names of the fastq files """
 	if sample_is_single_end(wildcards.sample):
-		return units.loc[(wildcards.sample), ["fq1"]].dropna()
+		return samples.loc[(wildcards.sample), ["fq1"]].dropna()
 	else:
-		return units.loc[(wildcards.sample), ["fq1", "fq2"]].dropna()
+		return samples.loc[(wildcards.sample), ["fq1", "fq2"]].dropna()
 
 def get_trimmed(wildcards):
 	""" This function checks if sample is paired end or single end
@@ -149,7 +148,7 @@ rule trimmomatic:
     output:
         fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
         fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz"
-    message: "Trimming single-end {wildcards.sample} reads"
+    message: "Trimming {wildcards.sample} reads"
     conda:
         "envs/trimmomatic.yaml"
     log:
