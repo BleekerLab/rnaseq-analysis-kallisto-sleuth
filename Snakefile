@@ -148,7 +148,7 @@ rule trimmomatic:
         fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz"
     message: "Trimming {wildcards.sample} reads"
     log:
-        RESULT_DIR + "logs/trimmomatic_se/{sample}.log"
+        RESULT_DIR + "logs/trimmomatic/{sample}.log"
     params :
         sampleName =                "{sample}",
         fq1_unpaired =              WORKING_DIR + "{sample}_R1_trimmed_unpaired.fq",
