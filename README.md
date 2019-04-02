@@ -82,7 +82,7 @@ If the experiment contains both single and paired end reads, it should be someth
 The Snakemake pipeline/workflow management system reads a master file (often called `Snakefile`) to list the steps to be executed and defining their order. It has many rich features. Read more [here](https://snakemake.readthedocs.io/en/stable/).
 
 ## Dry run
-From the folder containing the `Snakefile`, use the command `snakemake --use-conda -np` to perform a dry run that prints out the rules and commands.
+From the folder containing the `Snakefile`, use the command `snakemake -np` to perform a dry run that prints out the rules and commands.
 
 ## Real run
 Simply type `Snakemake` and provide the number of cores with `--cores 10` for ten cores for instance.  
