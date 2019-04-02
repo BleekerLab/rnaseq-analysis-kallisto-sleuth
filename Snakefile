@@ -99,8 +99,6 @@ rule estimate_transcript_abundance_using_kallisto:
     output:
         RESULT_DIR + "kallisto/{sample}/abundance.tsv"
     message:"computing {wildcards.sample} abundances using kallisto"
-    conda:
-        "envs/kallisto.yaml"
     threads: 10
     params:
         sampleName      = "{sample}",
@@ -149,8 +147,6 @@ rule trimmomatic:
         fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
         fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz"
     message: "Trimming {wildcards.sample} reads"
-    conda:
-        "envs/trimmomatic.yaml"
     log:
         RESULT_DIR + "logs/trimmomatic_se/{sample}.log"
     params :
