@@ -1,7 +1,7 @@
 """
-A Snakemake pipeline to go from mRNA-Seq reads to normalised transcript abundance estimates and differential expression 
+A Snakemake pipeline to go from mRNA-Seq reads to normalised transcript abundance estimates and differential expression
 """
-
+from snakemake.utils import min_version
 ############################
 ## Minimal Snakemake version
 ############################
@@ -27,7 +27,7 @@ MAX_LEN = 100
 # Threads
 THREADS = 10
 
-#################### 
+####################
 ## Desired outputs
 ####################
 KALLISTO = expand("results/kallisto/{samples}/abundance.tsv",samples=SAMPLES)
@@ -52,7 +52,7 @@ rule copy_master_files_to_results:
         RESULT_DIR + "Snakefile",
         RESULT_DIR + "config.yaml",
         RESULT_DIR + "environment.yaml"
-    message:"copy master files to ./results/" 
+    message:"copy master files to ./results/"
     shell:
         "cp {input} results/"
 
@@ -71,9 +71,9 @@ rule estimate_transcript_abundance_using_kallisto:
     shell:
         "mkdir -p kallisto/results/;"
         "kallisto quant -i {input.index} -o {params} "
-        "--single -l 180 -s 20 "			# average fragment length of 180 nts	
-        "-b 100 "					# number of bootstraps	
-        "--threads {THREADS} "					
+        "--single -l 180 -s 20 "			# average fragment length of 180 nts
+        "-b 100 "					# number of bootstraps
+        "--threads {THREADS} "
         "{input.reads} 2>{log}"
 
 rule create_kallisto_index:
@@ -86,11 +86,11 @@ rule create_kallisto_index:
     message:"creating kallisto index"
     shell:
         "kallisto index --make-unique -i {params} {input};"
-        "mv {params} index/" 
+        "mv {params} index/"
 
-################ 
-## Read trimming 
-################  
+################
+## Read trimming
+################
 rule trim_reads:
     input:
          "/zfs/scratch/mgalland_temp/{sample}.fastq"
@@ -110,4 +110,3 @@ rule gunzip:
     message:"Unzipping {input} file"
     shell:
         "zcat {input} > {output}"
-
