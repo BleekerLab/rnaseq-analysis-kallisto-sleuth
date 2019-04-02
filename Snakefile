@@ -5,7 +5,7 @@ from snakemake.utils import min_version
 ############################
 ## Minimal Snakemake version
 ############################
-#min_version("5.2.0")
+min_version("5.2.0")
 
 ############
 ## Libraries
