@@ -144,6 +144,7 @@ rule trimmomatic:
         fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
         fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz"
     message: "Trimming {wildcards.sample} reads"
+    threads: 10
     log:
         RESULT_DIR + "logs/trimmomatic/{sample}.log"
     params :
