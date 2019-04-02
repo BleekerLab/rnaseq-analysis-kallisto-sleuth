@@ -1,6 +1,6 @@
 ---
 
-units : samples.tsv
+samples : samples.tsv
 
 workdir: scratch/
 resultdir: results/

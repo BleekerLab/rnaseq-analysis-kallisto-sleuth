@@ -130,13 +130,13 @@ rule create_kallisto_index:
     output:
          WORKING_DIR + "index/kallisto_index.kidx"
     params:
-        "kallisto_index.kidx"
+        WORKING_DIR + "index/kallisto_index.kidx"
     message:"creating kallisto index"
     conda:
         "envs/kallisto.yaml"
     shell:
         "kallisto index --make-unique -i {params} {input};"
-        "mv {params} index/"
+#        "mv {params} index/"
 
 ################
 ## Read trimming
