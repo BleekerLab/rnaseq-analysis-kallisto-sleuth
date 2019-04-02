@@ -136,47 +136,30 @@ rule create_kallisto_index:
 ################
 ## Read trimming
 ################
-
-rule trimmomatic:
+rule fastp:
     input:
         get_fastq
     output:
         fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
-        fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz"
-    message: "Trimming {wildcards.sample} reads"
+        fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz",
+        html = RESULT_DIR + "fastp/{sample}.html"
+    message:"trimming {wildcards.sample} reads"
     threads: 10
     log:
-        RESULT_DIR + "logs/trimmomatic/{sample}.log"
-    params :
-        sampleName =                "{sample}",
-        fq1_unpaired =              WORKING_DIR + "{sample}_R1_trimmed_unpaired.fq",
-        fq2_unpaired =              WORKING_DIR + "{sample}_R2_trimmed_unpaired.fq",
-        seedMisMatches =            str(config['trimmomatic']['seedMisMatches']),
-        palindromeClipTreshold =    str(config['trimmomatic']['palindromeClipTreshold']),
-        simpleClipThreshhold =      str(config['trimmomatic']['simpleClipThreshold']),
-        LeadMinTrimQual =           str(config['trimmomatic']['LeadMinTrimQual']),
-        TrailMinTrimQual =          str(config['trimmomatic']['TrailMinTrimQual']),
-        windowSize =                str(config['trimmomatic']['windowSize']),
-        avgMinQual =                str(config['trimmomatic']['avgMinQual']),
-        minReadLen =                str(config['trimmomatic']['minReadLength']),
-        phred = 		            str(config["trimmomatic"]["phred"]),
-        adapters =                  str(config["trimmomatic"]["adapters"]),
-        maxLen =                    str(config["trimmomatic"]["maxLen"])
+        RESULT_DIR + "fastp/{sample}.log.txt"
+    params:
+        sampleName = "{sample}",
+        qualified_quality_phred = config["fastp"]["qualified_quality_phred"]
     run:
         if sample_is_single_end(params.sampleName):
-            shell("trimmomatic SE {params.phred} -threads {threads} \
-			{input} {output.fq1} \
-			ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} \
-			LEADING:{params.LeadMinTrimQual} \
-			TRAILING:{params.TrailMinTrimQual} \
-			SLIDINGWINDOW:{params.windowSize}:{params.avgMinQual} \
-			MINLEN:{params.minReadLen} CROP:{params.maxLen} 2>{log};\
+            shell("fastp --thread {threads}  --html {output.html} \
+            --qualified_quality_phred {params.qualified_quality_phred} \
+            --in1 {input} --out1 {output} \
+            2> {log}; \
 			touch {output.fq2}")
         else:
-            shell("trimmomatic PE {params.phred} -threads {threads} \
-			{input} {output.fq1} {params.fq1_unpaired} {output.fq2} {params.fq2_unpaired} \
-			ILLUMINACLIP:{params.adapters}:{params.seedMisMatches}:{params.palindromeClipTreshold}:{params.simpleClipThreshhold} \
-			LEADING:{params.LeadMinTrimQual} \
-			TRAILING:{params.TrailMinTrimQual} \
-			SLIDINGWINDOW:{params.windowSize}:{params.avgMinQual} \
-			MINLEN:{params.minReadLen} CROP:{params.maxLen} 2>{log}")
+            shell("fastp --thread {threads}  --html {output.html} \
+            --qualified_quality_phred {params.qualified_quality_phred} \
+            --detect_adapter_for_pe \
+            --in1 {input[0]} --in2 {input[1]} --out1 {output.fq1} --out2 {output.fq2}; \
+            2> {log}")
