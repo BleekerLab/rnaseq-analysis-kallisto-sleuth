@@ -37,12 +37,11 @@ args = parser.parse_args()
 # Have correct arguments been used?
 ###################################
 
-# if fastq is gunzipped please unzip 
+# if fastq is gunzipped please unzip
+# input can be gzipped or gunzipped, output is by defauld gunzipped
 
 #############
 # Subsampling
 #############
-seqtk_command = "seqtk sample -s " + args.seed + " " + args.fastq + " " + args.number 
+seqtk_command = f"seqtk sample -s{args.seed} {args.fastq} {args.number} > {args.outfile}" 
 subprocess.call(seqtk_command,shell=True)
-
-
