@@ -61,19 +61,22 @@ def get_trimmed(wildcards):
 ##################
 
 KALLISTO = expand(RESULT_DIR + "kallisto/{samples}/abundance.tsv",samples=SAMPLES)
-MASTERS = ["results/Snakefile","results/config.yaml","environment.yaml"]
+MASTERS  = ["results/Snakefile","results/config.yaml","environment.yaml"]
+SLEUTH   = [RESULT_DIR + "sleuth_object.Rds",RESULT_DIR + "abundance_wide.tsv"]
 
 rule all:
 	input:
 		KALLISTO,
-		MASTERS
+		MASTERS,
+		SLEUTH
 	message:"all done"
     #shell:
 #        "rm -r {WORKING_DIR}"
 
-################################
+
+###############################
 ## Copy master files to results
-##############################
+###############################
 rule copy_master_files_to_results:
     input:
         "Snakefile",
@@ -87,6 +90,30 @@ rule copy_master_files_to_results:
     message:"copy master files to ./results/"
     shell:
         "cp {input} results/"
+
+#######################
+## create sleath object
+#######################
+
+rule run_sleuth:
+    input:
+        expand(RESULT_DIR + "kallisto/{samples}/abundance.tsv",samples=SAMPLES)
+    output:
+        sleuth_object     = RESULT_DIR + "sleuth_object.Rds",
+        normalized_counts = RESULT_DIR + "abundance_wide.tsv"
+    params:
+        sampleFile        = config["samples"],
+        inputDir          = RESULT_DIR + "kallisto",
+        number_of_cores   = config["sleuth"]["number_of_cores"],
+        p_value           = config["sleuth"]["p_value"],
+        outputdir         = RESULT_DIR
+    script:
+        "script/sleuth_analysis.R -i {params.inputDir} "
+        "-s {params.sampleFile} "
+        "-c {params.number_of_cores} "
+        "-p {params.p_value} "
+        "-o {params.outputDir}"
+
 
 ##############################################################################
 ## Kallisto (pseudo-alignment) analysis for transcriptome and custom databases
