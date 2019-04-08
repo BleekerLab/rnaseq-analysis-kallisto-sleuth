@@ -12,3 +12,4 @@ dependencies:
     - r-sleuth=0.30.0
     - fastp=0.19.7
     - r-tidyverse=1.2.1
+    - r-optparse=1.6.1
