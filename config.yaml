@@ -18,4 +18,6 @@ kallisto:
   bootstrap: 100
 
 sleuth:
+  number_of_cores: 1
+  p_value: 0.05
   info: /home/mgalland/01_sequencing_runs/20160216_mRNAs_20_accessions/seqdesign.modified.txt
