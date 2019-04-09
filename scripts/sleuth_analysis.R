@@ -2,17 +2,7 @@ suppressPackageStartupMessages(library("sleuth"))
 suppressPackageStartupMessages(library("tidyverse"))
 suppressPackageStartupMessages(library("optparse"))
 
-# capture the command-line arguments after --args (e.g. the shortstack results directory)
-#args <- commandArgs(trailingOnly = TRUE)     
-
-# renaming for meaningful names
-#kallisto_directory = args[1] # indicates where are stored the kallisto results (one directory per sample)
-#number_of_cores = args[2]    # indicates how many cores we are using
-#design_file = args[3]        # design file that has both sample names and experimental conditions 
-#outdir = args[4]             # path to a directory where result tables will be saved
-#pval.signif = args[5]        # significance p-value threshold e.g. 0.05
-
-# arguments to provide
+# command-line arguments to provide
 option_list = list(
   make_option(c("-i", "--input_dir"), type="character", default="results/kallisto", help="directory where the sample directories containing the abandance files are located", metavar="character"),
   make_option(c("-s", "--sample_file"), type="character", default="samples.tsv", help="sample files used to get conditions for DESEq2 model fit", metavar="character"),
