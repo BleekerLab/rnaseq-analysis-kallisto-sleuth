@@ -108,7 +108,7 @@ rule run_sleuth:
         p_value           = config["sleuth"]["p_value"],
         outputdir         = RESULT_DIR
     script:
-        "script/sleuth_analysis.R -i {params.inputDir} "
+        "scripts/sleuth_analysis.R -i {params.inputDir} "
         "-s {params.sampleFile} "
         "-c {params.number_of_cores} "
         "-p {params.p_value} "
