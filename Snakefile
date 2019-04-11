@@ -102,17 +102,17 @@ rule run_sleuth:
         sleuth_object     = RESULT_DIR + "sleuth_object.Rds",
         normalized_counts = RESULT_DIR + "abundance_wide.tsv"
     params:
-        sampleFile        = config["samples"],
-        inputDir          = RESULT_DIR + "kallisto",
-        number_of_cores   = config["sleuth"]["number_of_cores"],
-        p_value           = config["sleuth"]["p_value"],
-        outputdir         = RESULT_DIR
-    script:
-        "scripts/sleuth_analysis.R -i {params.inputDir} "
-        "-s {params.sampleFile} "
-        "-c {params.number_of_cores} "
+        sample_file              = config["samples"],
+        input_directory          = RESULT_DIR + "kallisto",
+        p_value                  = config["sleuth"]["p_value"],
+        output_directory         = RESULT_DIR
+    threads: 10
+    shell:
+        "Rscript --vanilla scripts/sleuth_analysis.R -i {params.input_directory} "
+        "-s {params.sample_file} "
+        "-c {threads} "
         "-p {params.p_value} "
-        "-o {params.outputDir}"
+        "-o {params.output_directory} "
 
 
 ##############################################################################
@@ -151,7 +151,7 @@ rule estimate_transcript_abundance_using_kallisto:
 
 rule create_kallisto_index:
     input:
-         fasta = config["kallisto"]["fasta_ref"]
+        fasta = config["kallisto"]["fasta_ref"]
     output:
          WORKING_DIR + "index/kallisto_index.kidx"
     params:
@@ -182,11 +182,11 @@ rule fastp:
             shell("fastp --thread {threads}  --html {output.html} \
             --qualified_quality_phred {params.qualified_quality_phred} \
             --in1 {input} --out1 {output} \
-            2> {log}; \
+            2>{log}; \
 			touch {output.fq2}")
         else:
             shell("fastp --thread {threads}  --html {output.html} \
             --qualified_quality_phred {params.qualified_quality_phred} \
             --detect_adapter_for_pe \
             --in1 {input[0]} --in2 {input[1]} --out1 {output.fq1} --out2 {output.fq2}; \
-            2> {log}")
+            2>{log}")
