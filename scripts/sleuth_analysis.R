@@ -52,7 +52,7 @@ abundance.res.wide = t(spread(data = abundance.res.tidy,key = target_id, value =
 # write tables
 write.table(x = abundance.res.tidy, file = file.path(opt$outdir, "abundance_tidy.tsv"), quote = F,sep = "\t", row.names = F)
 write.table(x = abundance.res.wide, file = file.path(opt$outdir, "abundance_wide.tsv"), quote = F,sep = "\t", row.names = T, col.names = F)
-write.table(x = sleuth_table,file = file.path(outdir,"differential.tsv"),quote = F,sep = "\t",row.names = F)
+#write.table(x = sleuth_table,file = file.path(outdir,"differential.tsv"),quote = F,sep = "\t",row.names = F)
 
 # save R object
 saveRDS(so, file = file.path(opt$outdir,"sleuth_object.Rds"))
