@@ -39,13 +39,13 @@ abundance.res.tidy = select(abundance.res.tidy,-tpm,-eff_len,-condition,-len)
 abundance.res.wide = t(spread(data = abundance.res.tidy,key = target_id, value = est_counts))
 
 # differential tests
-# so <- sleuth_fit(so, ~condition, 'full')
-# so <- sleuth_fit(so, ~1, 'reduced')
-# so <- sleuth_lrt(so,"reduced","full")
+so <- sleuth_fit(so, ~condition, 'full')
+so <- sleuth_fit(so, ~1, 'reduced')
+so <- sleuth_lrt(so,"reduced","full")
 
 
-#sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all = FALSE)
-#sleuth_significant <- dplyr::filter(sleuth_table, qval <= opt$p_vaue)
+sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all = FALSE)
+sleuth_significant <- dplyr::filter(sleuth_table, qval <= opt$p_vaue)
 
 ##############
 # Save results
@@ -53,7 +53,7 @@ abundance.res.wide = t(spread(data = abundance.res.tidy,key = target_id, value =
 # write tables
 write.table(x = abundance.res.tidy, file = file.path(opt$outdir, "abundance_tidy.tsv"), quote = F,sep = "\t", row.names = F)
 write.table(x = abundance.res.wide, file = file.path(opt$outdir, "abundance_wide.tsv"), quote = F,sep = "\t", row.names = T, col.names = F)
-#write.table(x = sleuth_table,file = file.path(outdir,"differential.tsv"),quote = F,sep = "\t",row.names = F)
+write.table(x = sleuth_table,file = file.path(opt$outdir,"differential.tsv"),quote = F,sep = "\t",row.names = F)
 
 # save R object
 saveRDS(so, file = file.path(opt$outdir,"sleuth_object.Rds"))
