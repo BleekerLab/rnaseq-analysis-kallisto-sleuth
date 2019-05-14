@@ -27,6 +27,7 @@ samples2condition = samples2condition[,1:2]
 # add the path to kallisto result files
 samples2condition = mutate(samples2condition,path = kallisto_files)
 
+
 so <- sleuth_prep(samples2condition, num_cores = opt$number_of_cores, extra_bootstrap_summary=FALSE)
 
 ###########################################################
