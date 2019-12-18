@@ -27,7 +27,7 @@ FQ_DIR  = config["fqdir"]
 # Samples and conditions
 ########################
 samples = pd.read_csv("samples.tsv", dtype=str,index_col=0,sep="\t")
-SAMPLES = samples.index.get_level_values('sample').unique().tolist()
+SAMPLES = samples.index.tolist()
 
 ############################
 ## Input functions for rules
