@@ -37,8 +37,6 @@ def sample_is_single_end(sample):
     """This function detect missing value in the column 2 of the units.tsv"""
     if "fq2" not in samples.columns:
         return True
-    else:
-        return pd.isnull(samples.loc[(sample), "fq2"])
 
 def get_fastq(wildcards):
 	""" This function checks if the sample has paired end or single end reads
@@ -163,30 +161,48 @@ rule create_kallisto_index:
 ################
 ## Read trimming
 ################
-rule fastp:
-    input:
-        get_fastq
-    output:
-        fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
-        fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz",
-        html = RESULT_DIR + "fastp/{sample}.html"
-    message:"trimming {wildcards.sample} reads"
-    threads: 10
-    log:
-        RESULT_DIR + "fastp/{sample}.log.txt"
-    params:
-        sampleName = "{sample}",
-        qualified_quality_phred = config["fastp"]["qualified_quality_phred"]
-    run:
-        if sample_is_single_end(params.sampleName):
-            shell("fastp --thread {threads}  --html {output.html} \
-            --qualified_quality_phred {params.qualified_quality_phred} \
-            --in1 {input} --out1 {output} \
-            2>{log}; \
-			touch {output.fq2}")
-        else:
-            shell("fastp --thread {threads}  --html {output.html} \
-            --qualified_quality_phred {params.qualified_quality_phred} \
-            --detect_adapter_for_pe \
-            --in1 {input[0]} --in2 {input[1]} --out1 {output.fq1} --out2 {output.fq2}; \
-            2>{log}")
+if sample_is_single_end("{sample}"):
+    rule fastp:
+        input:
+            get_fastq
+        output:
+            fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
+            fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz",
+            html = RESULT_DIR + "fastp/{sample}.html"
+        message:"trimming {wildcards.sample} reads"
+        threads: 10
+        conda:
+            "envs/fastp.yaml"
+        log:
+            RESULT_DIR + "fastp/{sample}.log.txt"
+        params:
+            qualified_quality_phred = config["fastp"]["qualified_quality_phred"]
+        shell:
+            "fastp --thread {threads} "
+            "--html {output.html} "
+            "--qualified_quality_phred {params.qualified_quality_phred} "
+            "--in1 {input} --out1 {output} "
+            "2>{log}; "
+            "touch {output.fq2}"
+else:   
+    rule fastp:
+        input:
+            get_fastq
+        output:
+            fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
+            fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz",
+            html = RESULT_DIR + "fastp/{sample}.html"
+        message:"trimming {wildcards.sample} reads"
+        threads: 10
+        conda:
+            "envs/fastp.yaml"
+        log:
+            RESULT_DIR + "fastp/{sample}.log.txt"
+        params:
+            qualified_quality_phred = config["fastp"]["qualified_quality_phred"]
+        shell:
+            "fastp --thread {threads}  --html {output.html} "
+            "--qualified_quality_phred {params.qualified_quality_phred} "
+            "--detect_adapter_for_pe "
+            "--in1 {input[0]} --in2 {input[1]} --out1 {output.fq1} --out2 {output.fq2} "
+            "2>{log}"

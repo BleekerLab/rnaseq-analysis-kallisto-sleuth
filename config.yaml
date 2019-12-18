@@ -12,11 +12,11 @@ fastp:
 
 # kallisto fasta file that will be indexed by Kallisto
 kallisto:
-  fasta_ref: refs/petunia.transcripts.fasta
+  fasta_ref: refs/TAIR10_cdna_20110103_representative_gene_model_updated.fasta
   fragment-length: 90
   sd: 30
   bootstrap: 100
 
 sleuth:
   p_value: 0.05
-  info: /home/mgalland/01_sequencing_runs/20160216_mRNAs_20_accessions/seqdesign.modified.txt
+  info: design.tsv
