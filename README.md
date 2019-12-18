@@ -35,6 +35,16 @@ First, you need to create an environment where `Snakemake` and the python `panda
 2. Then, activate this virtual environment with `source activate rnaseq` or  `conda activate rnaseq` (with `conda =>4.5.0`)
 By using the software and package manager conda, Snakemake will then take care of installing and loading the packages and softwares required by each step of the pipeline.
 
+## Running a simple test
+A series of RNA-Seq sequencing files are available in the `data/` folder.  
+These fastq files were generated in two steps: 
+* using the R script`simulate_reads.R` that uses the [R `polyester` package](https://www.bioconductor.org/packages/release/bioc/vignettes/polyester/inst/doc/polyester.html) to generate _fasta_ files.  
+* Then, convert the generated fasta files to fastq files using the custom script: `convert_fasta_to_fastq_by_generating_qual_scores.py`. This script attach Phred score qualities to the fasta sequences and converts it to reads.     
+
+Change settings from the `simulate_experiment` function in the R script if you want to regenerate RNA-Seq reads using different settings. See the vignette for more details: https://www.bioconductor.org/packages/release/bioc/vignettes/polyester/inst/doc/polyester.html.   
+
+Install and activate the conda environment named _simulate_ using the conda environment file `simulate_reads.yaml` available in the `envs/` before running the scripts. 
+
 ## Configuration file
 Make sure you have changed the parameters in the `config.yaml` file that specifies where to find:
 - the sample data file `samples.tsv`
@@ -61,12 +71,12 @@ example of a file for an experiment containing piared end reads:
 In case of an experiment containing only single-end reads, the column 'fq2' can be omitted.
 The 'sample.tsv' will then look something like this:
 
-| sample   | genotype | fq1 |
+| sample   | treatment | fq1 |
 | ------- | ---------- |-----|
-| sample1 | w.t. | readsS1.fastq |
-| sample2 | w.t. | readsS2.fastq |
-| sample3 | mutant | readsS3.fastq |
-| sample4 | mutant | readsS4.fastq |
+| sample1 | control | readsS1.fastq |
+| sample2 | control | readsS2.fastq |
+| sample3 | treated | readsS3.fastq |
+| sample4 | treated | readsS4.fastq |
 
 
 If the experiment contains both single and paired end reads, it should be something like this:
@@ -75,8 +85,8 @@ If the experiment contains both single and paired end reads, it should be someth
 | ------- | ---------- |-----|-----|
 | sample1 | control | readsS1_R1.fastq | readsS1_R2.fastq |
 | sample2 | control | readsS2.fastq | |
-| sample3 | drought | readsS3_R1.fastq | readsS3_R2.fastq |
-| sample4 | drought | readsS4.fastq | |
+| sample3 | treated | readsS3_R1.fastq | readsS3_R2.fastq |
+| sample4 | treated | readsS4.fastq | |
 
 ## Snakemake execution
 The Snakemake pipeline/workflow management system reads a master file (often called `Snakefile`) to list the steps to be executed and defining their order. It has many rich features. Read more [here](https://snakemake.readthedocs.io/en/stable/).
