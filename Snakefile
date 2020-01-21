@@ -13,6 +13,10 @@ min_version("5.2.0")
 
 import pandas as pd
 
+# this container defines the underlying OS for each job when using the workflow
+# with --use-conda --use-singularity
+singularity: "docker://continuumio/miniconda3"
+
 ###############
 # Configuration
 ###############
@@ -153,58 +157,15 @@ rule fastp:
     log:
         RESULT_DIR + "fastp/{sample}.log.txt"
     params:
+        sample_name = "{sample}",
         qualified_quality_phred = config["fastp"]["qualified_quality_phred"]
     run:
-        print(input[0])
-        if len(input[0]) == 1: # single end
+        if sample_is_single_end(params.sample_name): # single end
             shell("fastp --thread {threads} --html {output.html} --qualified_quality_phred {params.qualified_quality_phred}  --in1 {input} --out1 {output} 2>{log}")
             shell("touch {output.fq2}")
-        elif len(input[0]) == 2:  # paired-end
+        else:  
             shell("fastp --thread {threads} --html {output.html} --qualified_quality_phred {params.qualified_quality_phred}  --in1 {input[0]} --in2 {input[1]} --out1 {output.fq1} --out2 {output.fq2} 2>{log}")  
 
 
-# if sample_is_single_end("sample"):
-#     rule fastp:
-#         input:
-#             get_fastq
-#         output:
-#             fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
-#             fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz",
-#             html = RESULT_DIR + "fastp/{sample}.html"
-#         message:"trimming {wildcards.sample} reads"
-#         threads: 10
-#         conda:
-#             "envs/fastp.yaml"
-#         log:
-#             RESULT_DIR + "fastp/{sample}.log.txt"
-#         params:
-#             qualified_quality_phred = config["fastp"]["qualified_quality_phred"]
-#         shell:
-#             "fastp --thread {threads} "
-#             "--html {output.html} "
-#             "--qualified_quality_phred {params.qualified_quality_phred} "
-#             "--in1 {input} --out1 {output} "
-#             "2>{log}; "
-#             "touch {output.fq2}"
-# else:   
-#     rule fastp:
-#         input:
-#             get_fastq
-#         output:
-#             fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
-#             fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz",
-#             html = RESULT_DIR + "fastp/{sample}.html"
-#         message:"trimming {wildcards.sample} reads"
-#         threads: 10
-#         conda:
-#             "envs/fastp.yaml"
-#         log:
-#             RESULT_DIR + "fastp/{sample}.log.txt"
-#         params:
-#             qualified_quality_phred = config["fastp"]["qualified_quality_phred"]
-#         shell:
-#             "fastp --thread {threads}  --html {output.html} "
-#             "--qualified_quality_phred {params.qualified_quality_phred} "
-#             "--detect_adapter_for_pe "
-#             "--in1 {input[0]} --in2 {input[1]} --out1 {output.fq1} --out2 {output.fq2} "
-#             "2>{log}"
+
+
