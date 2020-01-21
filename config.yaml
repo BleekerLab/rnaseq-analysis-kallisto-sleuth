@@ -12,11 +12,7 @@ fastp:
 
 # kallisto fasta file that will be indexed by Kallisto
 kallisto:
-  fasta_ref: refs/TAIR10_cdna_20110103_representative_gene_model_updated.fasta
+  fasta_ref: refs/S_lycopersicum_ITAG4.0_cDNA.fasta
   fragment-length: 90
   sd: 30
   bootstrap: 100
-
-sleuth:
-  p_value: 0.05
-  info: design.tsv
