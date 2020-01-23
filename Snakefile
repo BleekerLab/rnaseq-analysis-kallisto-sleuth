@@ -102,7 +102,6 @@ rule run_sleuth:
 rule estimate_transcript_abundance_using_kallisto:
     input:
         index = WORKING_DIR + "index/kallisto_index.kidx",
-        #reads = get_trimmed, 
         fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
         fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz"
     output:
@@ -149,9 +148,10 @@ rule fastp:
     input:
         get_fastq
     output:
-        fq1 = WORKING_DIR + "{sample}_R1_trimmed.fq.gz",
-        fq2 = WORKING_DIR + "{sample}_R2_trimmed.fq.gz",
-        html = RESULT_DIR + "fastp/{sample}.html"
+        fq1 = temp(WORKING_DIR + "{sample}_R1_trimmed.fq.gz"),
+        fq2 = temp(WORKING_DIR + "{sample}_R2_trimmed.fq.gz"),
+        html = RESULT_DIR + "fastp/{sample}.html",
+        json = RESULT_DIR + "fastp/{sample}.json",
     message:"trimming {wildcards.sample} reads"
     threads: 10
     log:
@@ -161,10 +161,10 @@ rule fastp:
         qualified_quality_phred = config["fastp"]["qualified_quality_phred"]
     run:
         if sample_is_single_end(params.sample_name): # single end
-            shell("fastp --thread {threads} --html {output.html} --qualified_quality_phred {params.qualified_quality_phred}  --in1 {input} --out1 {output} 2>{log}")
+            shell("fastp --thread {threads} --html {output.html} --json {output.json} --qualified_quality_phred {params.qualified_quality_phred}  --in1 {input} --out1 {output} 2>{log}")
             shell("touch {output.fq2}")
         else:  
-            shell("fastp --thread {threads} --html {output.html} --qualified_quality_phred {params.qualified_quality_phred}  --in1 {input[0]} --in2 {input[1]} --out1 {output.fq1} --out2 {output.fq2} 2>{log}")  
+            shell("fastp --thread {threads} --html {output.html} --json {output.json} --qualified_quality_phred {params.qualified_quality_phred}  --in1 {input[0]} --in2 {input[1]} --out1 {output.fq1} --out2 {output.fq2} 2>{log}")  
 
 
 
