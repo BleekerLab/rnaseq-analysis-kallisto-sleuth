@@ -2,8 +2,6 @@ name: kallisto
 channels:
   - bioconda
   - r
-  - conda-forge
-  - defaults
 dependencies:
   - snakemake=5.26.0  
   - fastp = 0.19.5
