@@ -2,6 +2,7 @@
 A Snakemake pipeline to go from mRNA-Seq reads to normalised transcript abundance estimates and differential expression
 """
 from snakemake.utils import min_version
+
 ############################
 ## Minimal Snakemake version
 ############################
@@ -12,10 +13,6 @@ min_version("5.2.0")
 ############
 
 import pandas as pd
-
-# this container defines the underlying OS for each job when using the workflow
-# with --use-conda --use-singularity
-singularity: "docker://continuumio/miniconda3"
 
 ###############
 # Configuration

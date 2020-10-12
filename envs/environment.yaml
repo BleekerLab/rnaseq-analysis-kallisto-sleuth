@@ -1,0 +1,12 @@
+name: kallisto
+channels:
+  - bioconda
+  - r
+  - conda-forge
+  - defaults
+dependencies:
+  - fastp = 0.19.5
+  - kallisto=0.45.0
+  - r-sleuth=0.30.0=r36_2
+  - r-optparse=1.6.6=r36h6115d3f_1
+  - r-dplyr=1.0.2=r36h710217c_0 
