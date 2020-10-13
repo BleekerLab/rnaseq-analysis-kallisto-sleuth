@@ -1,0 +1,7 @@
+sample	condition	fq1	fq2
+sample_01	wt	.fastq/Cultivar-01_R1.subsampled.fastq	.fastq/Cultivar-01_R2.subsampled.fastq
+sample_02	wt	.fastq/Cultivar-02_R1.subsampled.fastq	.fastq/Cultivar-02_R2.subsampled.fastq
+sample_03	wt	.fastq/Cultivar-02_R1.subsampled.fastq	.fastq/Cultivar-02_R2.subsampled.fastq
+sample_04	mutant	.fastq/Cultivar-02_R1.subsampled.fastq	.fastq/Cultivar-02_R2.subsampled.fastq
+sample_05	mutant	.fastq/Cultivar-02_R1.subsampled.fastq	.fastq/Cultivar-02_R2.subsampled.fastq
+sample_06	mutant	.fastq/Cultivar-02_R1.subsampled.fastq	.fastq/Cultivar-02_R2.subsampled.fastq

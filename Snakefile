@@ -18,7 +18,7 @@ import pandas as pd
 # Configuration
 ###############
 
-configfile: "config.yaml"
+configfile: "config/config.yaml"
 
 WORKING_DIR = config["workdir"]
 RESULT_DIR  = config["resultdir"]
@@ -27,8 +27,10 @@ FQ_DIR  = config["fqdir"]
 ########################
 # Samples and conditions
 ########################
-samples = pd.read_csv("samples.tsv", dtype=str, sep="\t").set_index("sample", drop=False)
+samples = pd.read_csv("config/samples.tsv", dtype=str, sep="\t").set_index("sample", drop=False)
 SAMPLES = samples.index.tolist()
+
+print(SAMPLES)
 
 ############################
 ## Input functions for rules
@@ -59,23 +61,23 @@ def get_trimmed(wildcards):
 ##################
 
 KALLISTO = expand(RESULT_DIR + "kallisto/{samples}/abundance.tsv",samples=SAMPLES)
-SLEUTH   = RESULT_DIR + "abundance_tidy.tsv"
+TIDY_COUNTS = RESULT_DIR + "abundance_tidy.tsv"
 
 rule all:
 	input:
 		KALLISTO,
-		SLEUTH
+		TIDY_COUNTS
 	message:"all done"
 
 ###############################
 ## Rules
 ###############################
 
-#######################
-## create sleuth object
-#######################
+##########################################################
+## Sleuth outputs: scaled counts and differential analysis
+##########################################################
 
-rule run_sleuth:
+rule get_scaled_counts:
     input:
         expand(RESULT_DIR + "kallisto/{samples}/abundance.tsv",samples=SAMPLES)
     output:
@@ -86,7 +88,8 @@ rule run_sleuth:
         output_directory         = RESULT_DIR
     threads: 10
     shell:
-        "Rscript --vanilla scripts/sleuth_analysis.R -i {params.input_directory} "
+        "Rscript --vanilla scripts/sleuth_analysis.R "
+        "-i {params.input_directory} "
         "-s {params.sample_file} "
         "-c {threads} "
         "-o {params.output_directory} "
