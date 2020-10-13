@@ -1,5 +1,4 @@
-# A Snakemake RNA-Seq analysis pipeline relying on Kallisto and Sleuth
-mRNA-Seq analysis using Kallisto and Sleuth.
+# A Snakemake RNA-Seq pipeline with Kallisto and Sleuth
 
 A snakemake pipeline for the analysis of RNA-seq data that makes use of [Kallisto and sleuth](https://scilifelab.github.io/courses/rnaseq/labs/kallisto).
 
@@ -7,18 +6,20 @@ A snakemake pipeline for the analysis of RNA-seq data that makes use of [Kallist
 [![Miniconda](https://img.shields.io/badge/miniconda-blue.svg)](https://conda.io/miniconda)
 
 ## Aim
-To align, count, normalize counts and compute differential gene expressions between conditions using single-end, paired-end or a mixture of both Illumina RNA-seq data.
+To perform the _pseudo-alignment_ steps of RNA-seq (Illumina) reads to a transcriptome reference and output individual Kallisto estimates and produce a file of the transcript scaled counts.  
 
-## Description
-This pipeline analyses the raw RNA-seq data and produce a file containing normalized counts and differential expressions. The raw fastq files will be trimmed for adaptors and quality checked with trimmomatic. Next, the trimmed reads are mapped and counted to produce abundance files against the transcriptome fasta file using kallisto. The counts are normalized and differential expressions are calculated using sleuth.
+## Outputs
+This pipeline analyses the raw RNA-seq data and produces:
+1. A file containing normalized counts.
+2. Individual Kallisto estimates that can be used for differential expression with Sleuth. 
 
 
 ## Content
 - `Snakefile`: a master file that contains the desired outputs and the rules to generate them from the input files.
-- `config.yaml`: the configuration files making the Snakefile adaptable to any input files, transcriptome and parameters for the rules.
-- `fastq/`: This folder should contain pairs of paired-end reads, single-end, or a mixture of paired and single-end reads in fastq format.
+- `config/config.yaml`: the configuration files making the Snakefile adaptable to any input files, transcriptome and parameters for the rules.
+- `fastq/`: This folder should contain single-end or paired-end reads, or a mixture of paired and single-end reads in fastq format.
 - `envs/`: a folder containing the environments needed for the conda package manager. If run with the `--use-conda` command, Snakemake will install the necessary softwares and packages using the conda environment files.
-- `samples.tsv`:  a file containing information about the names, the paths and the conditions of the samples used.
+- `config/samples.tsv`:  a file containing information about the names, the paths and the conditions of the samples used.
 **This file has to be adapted to your sample names before running the pipeline**.
 
 # Usage
@@ -30,8 +31,8 @@ You will need a local copy of the `rnaseq-analysis-kallisto-sleuth` on your mach
 
 ## Installing and activating a virtual environment
 First, you need to create an environment where `Snakemake` and the python `pandas`package will be installed. To do that, we will use the conda package manager.   
-1. Create a virtual environment named `rnaseq` using the `environment.yaml` file with the following command: `conda env create --file environment.yaml`
-2. Then, activate this virtual environment with `source activate rnaseq` or  `conda activate rnaseq` (with `conda =>4.5.0`)
+1. Create a virtual environment named `kallisto` using the `environment.yaml` file with the following command: `conda env create --file environment.yaml`
+2. Then, activate this virtual environment with `source activate kallisto` or  `conda activate kallisto` (with `conda =>4.5.0`)
 By using the software and package manager conda, Snakemake will then take care of installing and loading the packages and softwares required by each step of the pipeline.
 
 ## Configuration file
@@ -85,24 +86,11 @@ From the folder containing the `Snakefile`, use the command `snakemake -np` to p
 
 ## Test run
 Open a Shell window and execute these steps:
-* `conda activate rnaseq`
+* `conda activate kallisto`
 * `snakemake --use-conda --directory .test`
 
 ## Cluster execution
 For cluster execution, please refer to the [Snakemake reference](https://snakemake.readthedocs.io/en/stable/executable.html#cluster-execution).
-
-# Main outputs
-- the transcript abundance files abundance.tsv.
-
-# Simulating RNA-Seq reads
-A series of RNA-Seq sequencing files are available in the `data/` folder. These files are used to test the pipeline. 
-These fastq files were generated in two steps: 
-* using the R script`simulate_reads.R` that uses the [R `polyester` package](https://www.bioconductor.org/packages/release/bioc/vignettes/polyester/inst/doc/polyester.html) to generate _fasta_ files.  
-* Then, convert the generated fasta files to fastq files using the custom script: `convert_fasta_to_fastq_by_generating_qual_scores.py`. This script attach Phred score qualities to the fasta sequences and converts it to reads.     
-
-Change settings from the `simulate_experiment` function in the R script if you want to regenerate RNA-Seq reads using different settings. See the vignette for more details: https://www.bioconductor.org/packages/release/bioc/vignettes/polyester/inst/doc/polyester.html.   
-
-Install and activate the conda environment named _simulate_ using the conda environment file `simulate_reads.yaml` available in the `envs/` before running the scripts. 
 
 # Graph of jobs
 ![dag.png](./dag.png)

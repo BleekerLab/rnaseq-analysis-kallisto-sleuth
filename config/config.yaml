@@ -1,11 +1,11 @@
 ---
 
-samples : samples.tsv
+samples : config/samples.tsv
 
 workdir:   temp/     # will be removed
 resultdir: results/  # will be kept
 
-fqdir: .fastq/
+fqdir: .test/
 
 fastp:
   qualified_quality_phred: 15 # the quality value that a base is qualified. Default 15 means phred quality >=Q15 is qualified. (int [=15])

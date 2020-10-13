@@ -30,8 +30,6 @@ FQ_DIR  = config["fqdir"]
 samples = pd.read_csv("config/samples.tsv", dtype=str, sep="\t").set_index("sample", drop=False)
 SAMPLES = samples.index.tolist()
 
-print(SAMPLES)
-
 ############################
 ## Input functions for rules
 ############################

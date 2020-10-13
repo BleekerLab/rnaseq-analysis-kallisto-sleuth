@@ -9,3 +9,5 @@
 *.Rproj
 .Rproj.user
 rnaseq-analysis-kallisto-sleuth.Rproj
+.test/
+temp/
