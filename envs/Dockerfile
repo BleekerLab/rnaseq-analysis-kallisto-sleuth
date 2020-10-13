@@ -5,11 +5,6 @@ WORKDIR /home/snakemake/
 COPY environment.yaml ./
 
 
-# Set channel priority 
-#RUN conda config --add channels conda-forge \
-#  && conda config --add channels r \
-#  && conda config --add channels bioconda
-
 # mamba is a faster C++ re-implemenbtation of conda
 RUN conda install -c conda-forge mamba --yes \
   && mamba create -c bioconda \
