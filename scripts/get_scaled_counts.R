@@ -1,5 +1,5 @@
 suppressPackageStartupMessages(library("sleuth"))
-suppressPackageStartupMessages(library("dplyr"))
+suppressPackageStartupMessages(library("tidyverse"))
 suppressPackageStartupMessages(library("optparse"))
 
 # command-line arguments to provide
@@ -61,14 +61,20 @@ abundance.res.tidy = kallisto_table(so,
 	use_filtered = TRUE,
 	normalized = TRUE)
 
-abundance.res.tidy = dplyr::select(abundance.res.tidy,-tpm,-eff_len,-condition,-len)
+abundance.res.tidy = dplyr::select(abundance.res.tidy, -tpm, -eff_len, -condition, -len)
 
+
+abundance_wide = pivot_wider(data = abundance.res.tidy, 
+                             id_cols = target_id, 
+                             names_from = sample, 
+                             values_from = est_counts) 
 
 ##############
 # Save results
 #############
 # write tables
-write.table(x = abundance.res.tidy, 
-	file = file.path(opt$outdir, "abundance_tidy.tsv"), 
-	quote = F,sep = "\t", 
+write.table(x = abundance_wide, 
+	file = file.path(opt$outdir, "scaled_counts_from_kallisto.tsv"), 
+	quote = F,
+  sep = "\t", 
 	row.names = F)

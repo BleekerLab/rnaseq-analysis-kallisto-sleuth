@@ -59,12 +59,12 @@ def get_trimmed(wildcards):
 ##################
 
 KALLISTO = expand(RESULT_DIR + "kallisto/{samples}/abundance.tsv",samples=SAMPLES)
-TIDY_COUNTS = RESULT_DIR + "abundance_tidy.tsv"
+SCALED_COUNTS = RESULT_DIR + "scaled_counts_from_kallisto.tsv"
 
 rule all:
 	input:
 		KALLISTO,
-		TIDY_COUNTS
+		SCALED_COUNTS
 	message:"all done"
 
 ###############################
@@ -79,14 +79,14 @@ rule get_scaled_counts:
     input:
         expand(RESULT_DIR + "kallisto/{samples}/abundance.tsv",samples=SAMPLES)
     output:
-        normalized_counts = RESULT_DIR + "abundance_tidy.tsv"
+        normalized_counts = RESULT_DIR + "scaled_counts_from_kallisto.tsv"
     params:
         sample_file              = config["samples"],
         input_directory          = RESULT_DIR + "kallisto",
         output_directory         = RESULT_DIR
     threads: 10
     shell:
-        "Rscript --vanilla scripts/sleuth_analysis.R "
+        "Rscript --vanilla scripts/get_scaled_counts.R "
         "-i {params.input_directory} "
         "-s {params.sample_file} "
         "-c {threads} "
